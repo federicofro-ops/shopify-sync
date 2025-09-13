@@ -1,0 +1,32 @@
+name: Shopify Stock Sync
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # ogni 15 minuti (UTC)
+  workflow_dispatch: {}
+
+jobs:
+  stock:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: shopify-stock
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        run: npm i --no-audit --no-fund axios dotenv
+      - name: Create .env from secrets
+        run: |
+          cat > .env <<'EOF'
+          STOREGEST_DOMAIN=${{ secrets.STOREGEST_DOMAIN }}
+          STOREGEST_APIKEY=${{ secrets.STOREGEST_APIKEY }}
+          SHOPIFY_STORE=${{ secrets.SHOPIFY_STORE }}
+          SHOPIFY_ADMIN_TOKEN=${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_API_VERSION=${{ secrets.SHOPIFY_API_VERSION }}
+          SHOPIFY_LOCATION_ID=${{ secrets.SHOPIFY_LOCATION_ID }}
+          EOF
+      - name: Sync stocks (last 15 min)
+        run: node sg_stock_sync.js --since=15 --verbose

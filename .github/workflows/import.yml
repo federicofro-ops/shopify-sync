@@ -1,0 +1,33 @@
+name: Shopify Import (daily)
+
+on:
+  schedule:
+    # 03:10 ora italiana ≈ 01:10 UTC (cron è in UTC)
+    - cron: "10 1 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: shopify-import
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        run: npm i --no-audit --no-fund axios dotenv fast-xml-parser
+      - name: Create .env from secrets
+        run: |
+          cat > .env <<'EOF'
+          STOREGEST_DOMAIN=${{ secrets.STOREGEST_DOMAIN }}
+          STOREGEST_APIKEY=${{ secrets.STOREGEST_APIKEY }}
+          SHOPIFY_STORE=${{ secrets.SHOPIFY_STORE }}
+          SHOPIFY_ADMIN_TOKEN=${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          SHOPIFY_API_VERSION=${{ secrets.SHOPIFY_API_VERSION }}
+          SHOPIFY_LOCATION_ID=${{ secrets.SHOPIFY_LOCATION_ID }}
+          EOF
+      - name: Import from feed (SKU-based)
+        run: node gm_xml_import.js import "${{ vars.GM_FEED_URL }}" --group=item_group_id --map=map.json --verbose

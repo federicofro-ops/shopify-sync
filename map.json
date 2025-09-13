@@ -1,0 +1,18 @@
+{
+  "sku": ["SKU", "g:sku"],
+
+  "title": ["g:title"],
+  "description": ["g:description"],
+  "brand": ["g:brand"],
+  "category": ["g:custom_label_1", "g:google_product_category"],
+  "type": ["g:product_highlight", "g:product_type"],
+  "color": ["g:color"],
+  "size": ["g:size"],
+  "price": ["g:sale_price", "g:price"],
+  "compare_at_price": ["g:price"],
+  "barcode": ["g:gtin", "g:mpn"],
+  "image": ["g:image_link"],
+  "additional_images": ["g:additional_image_link"],
+  "group": ["g:item_group_id"],
+  "tags": ["Brand:${brand}","Categoria:${category}","Tipologia:${type}"]
+}
